@@ -1,6 +1,7 @@
 require('dotenv/config');
 
 const express = require("express");
+const cors = require('cors');
 const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
@@ -20,6 +21,8 @@ function ensureDirectoryExistence(filePath) {
         fs.mkdirSync(dir, { recursive: true });
     }
 }
+
+app.use(cors());
 
 // Route to handle tile requests
 app.get("/:z/:x/:y.png", async (req, res) => {
