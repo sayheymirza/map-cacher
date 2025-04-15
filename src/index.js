@@ -5,14 +5,18 @@ const cors = require('cors');
 const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
+const sharp = require('sharp');
 
 const app = express();
 const port = process.env['PORT'];
 
-const MAP_URL = process.env['MAP_URL'];
+const maps = {
+    'google_standard': 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
+    'osm_bright': 'https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}@2x.png?api_key=2da14bce-3a30-45fb-8b2e-6280d4197333'
+};
 
 // Local cache directory
-const CACHE_DIR = path.resolve(__dirname, "cache");
+const CACHE_DIR = path.resolve(process.env['MAP_DIR'], "cache");
 
 // Helper function to create directories if they don't exist
 function ensureDirectoryExistence(filePath) {
@@ -24,12 +28,22 @@ function ensureDirectoryExistence(filePath) {
 
 app.use(cors());
 
+app.get('/', (req, res) => {
+    res.json({
+        maps: Object.keys(maps)
+    })
+});
+
 // Route to handle tile requests
-app.get("/:z/:x/:y.png", async (req, res) => {
-    const { z, x, y } = req.params;
+app.get("/:map/:z/:x/:y.png", async (req, res) => {
+    const { map, z, x, y } = req.params;
+
+    if (!maps[map]) {
+        return res.status(404);
+    }
 
     // Path to cache file
-    const cachePath = path.join(CACHE_DIR, z, x, `${y}.png`);
+    const cachePath = path.join(CACHE_DIR, map, z, x, `${y}.png`);
 
     // Check if the file is already cached
     if (fs.existsSync(cachePath)) {
@@ -38,7 +52,10 @@ app.get("/:z/:x/:y.png", async (req, res) => {
     }
 
     // If not cached, fetch the image from MapTiler
-    const tileUrl = MAP_URL.replace('${z}', z).replace('${x}', x).replace('${y}', y);
+    const tileUrl = maps[map].replace('{z}', z).replace('{x}', x).replace('{y}', y);
+
+    console.log(tileUrl);
+    
 
     try {
         const response = await axios.get(tileUrl, { responseType: "stream" });
@@ -48,7 +65,11 @@ app.get("/:z/:x/:y.png", async (req, res) => {
 
         // Save the image to the cache and serve it
         const writeStream = fs.createWriteStream(cachePath);
-        response.data.pipe(writeStream);
+        // response.data.pipe(writeStream);
+
+        response.data
+            .pipe(sharp().png({ compressionLevel: 9, quality: 100 }))
+            .pipe(writeStream);
 
         writeStream.on("finish", () => {
             res.sendFile(cachePath);
@@ -59,7 +80,6 @@ app.get("/:z/:x/:y.png", async (req, res) => {
             res.status(500).send("Internal server error");
         });
     } catch (error) {
-        console.error("Error fetching tile:", error);
         res.status(500).send("Failed to fetch tile");
     }
 });
