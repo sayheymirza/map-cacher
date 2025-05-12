@@ -1,0 +1,16 @@
+volumes:
+  map-cacher-volume:
+
+services:
+  map-cacher:
+    build:
+      context: .
+    image: map-cacher
+    environment:
+      - PORT=3000
+      - MAP_DIR=/app/volume
+    ports:
+      - 3000:3000
+    volumes:
+      - map-cacher-volume:/app/volume
+    restart: always
