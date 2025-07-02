@@ -12,7 +12,10 @@ const port = process.env['PORT'];
 
 const maps = {
     'google_standard': 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
-    'osm_bright': 'https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}@2x.png?api_key=2da14bce-3a30-45fb-8b2e-6280d4197333'
+    'osm_bright': 'https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}@2x.png?api_key=2da14bce-3a30-45fb-8b2e-6280d4197333',
+    'outdoors': 'https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}@2x.png?api_key=2da14bce-3a30-45fb-8b2e-6280d4197333',
+    'alidade_smooth_dark': 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}@2x.png?api_key=2da14bce-3a30-45fb-8b2e-6280d4197333',
+    'alidade_smooth_light': 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}@2x.png?api_key=2da14bce-3a30-45fb-8b2e-6280d4197333',
 };
 
 // Local cache directory
