@@ -55,7 +55,7 @@ app.get("/:map/:z/:x/:y.png", async (req, res) => {
     const tileUrl = maps[map].replace('{z}', z).replace('{x}', x).replace('{y}', y);
 
     console.log(tileUrl);
-    
+
 
     try {
         const response = await axios.get(tileUrl, { responseType: "stream" });
@@ -68,7 +68,14 @@ app.get("/:map/:z/:x/:y.png", async (req, res) => {
         // response.data.pipe(writeStream);
 
         response.data
-            .pipe(sharp().png({ compressionLevel: 9, quality: 100 }))
+            .pipe(
+                sharp()
+                    .png({
+                        compressionLevel: 9, quality: 80
+                    }).webp({
+                        force: true,
+                        quality: 90
+                    }))
             .pipe(writeStream);
 
         writeStream.on("finish", () => {
